@@ -5,6 +5,7 @@
 Para niciar el proyecto se necsita node para el backend
 
 Configurar el Backend
+
 1 Instalar dependencias
 
 cd backend
