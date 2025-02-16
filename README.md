@@ -9,7 +9,9 @@ Configurar el Backend
 1 Instalar dependencias
 
 cd backend
-npm install
+
+npm install express cors dotenv oracledb
+
 
 2 Configurar la conexión a Oracle
 Editar los 4 archivos del backend index.js, delitos,detenidos y policias y agrega tus credenciales de Oracle:
@@ -20,18 +22,23 @@ module.exports = {
   connectString: "localhost:1521/freepdb2"
 };
 
-3Iniciar el servidor
+3 Iniciar el servidor
 
 npm start 
 
-Frontend 
+##Frontend 
+En la carpeta raiz
+npx create-react-app frontend
 
-1 Instalar dependencias
+2 Instalar dependencias
 
-cd ../frontend
-npm install
+cd /frontend
 
-2 Iniciar la aplicación React
+npm install axios
+
+3 Iniciar con npm start
+
+
 
 npm start
 
