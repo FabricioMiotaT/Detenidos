@@ -233,9 +233,12 @@ CREATE TABLE Evidencia (
     FOREIGN KEY (ID_Caso) REFERENCES Casos(ID_Caso)
 );
 
+COMMIT;
+
 -- 1. Tipo_Delito
 INSERT INTO Tipo_Delito (Tipo, Descripcion) VALUES ('Robo', 'Delito relacionado con el hurto de bienes');
 INSERT INTO Tipo_Delito (Tipo, Descripcion) VALUES ('Homicidio', 'Delito relacionado con la muerte de una persona');
+
 
 -- 2. Banda_Criminal
 INSERT INTO Banda_Criminal (Nombre, Area_Influencia, Descripcion) VALUES ('Los Malditos', 'Norte de la ciudad', 'Banda dedicada al robo y extorsión');
@@ -303,10 +306,6 @@ VALUES (1, '87654321', 'DEL1', TO_DATE('2023-10-01', 'YYYY-MM-DD'), 'Calle Princ
 INSERT INTO Antecedentes_Penales (ID_Antecedente, Documento_Identidad, Codigo_Delito, Fecha_Registro, Lugar, Observaciones) 
 VALUES (2, '12345678', 'DEL2', TO_DATE('2023-10-02', 'YYYY-MM-DD'), 'Avenida Central', 'Antecedente por homicidio calificado');
 
-INSERT INTO Antecedentes_Penales (ID_Antecedente, Documento_Identidad, Codigo_Delito, Fecha_Registro, Lugar, Observaciones) 
-VALUES (3, '12345678', 'DEL3', TO_DATE('2024-10-02', 'YYYY-MM-DD'), 'Avenida Mala', 'Antecedentes por extorsión');
-
-
 -- 14. Confiscacion_Bienes
 INSERT INTO Confiscacion_Bienes (ID_Confiscacion, Documento_Identidad, Numero_Documento, Bien_Descripcion, Cantidad, Fecha_Confiscacion, Valor_Estimado) 
 VALUES (1, '87654321', 'DOC1', 'Arma de fuego', 1, TO_DATE('2023-10-01', 'YYYY-MM-DD'), 1500.00);
@@ -362,7 +361,6 @@ INSERT INTO Evidencia (ID_Evidencia, ID_Caso, Tipo_Evidencia, Descripcion, Fecha
 VALUES (2, 2, 'Balística', 'Informe balístico', TO_DATE('2023-10-02', 'YYYY-MM-DD'), 'Archivo Central');
 COMMIT;
 
-
 --Nuevos registros
 INSERT INTO Tipo_Delito (Tipo, Descripcion) VALUES ('Extorsión', 'Delito relacionado con la coacción');
 INSERT INTO Tipo_Delito (Tipo, Descripcion) VALUES ('Secuestro', 'Delito relacionado con la privación de libertad');
@@ -378,6 +376,9 @@ INSERT INTO Banda_Criminal (Nombre, Area_Influencia, Descripcion)
 VALUES ('Los Fantasmas', 'Centro de la ciudad', 'Banda dedicada al narcotráfico');
 INSERT INTO Banda_Criminal (Nombre, Area_Influencia, Descripcion) 
 VALUES ('Los god', 'Norte de la ciudad', 'Banda dedicada a la extorsión');
+INSERT INTO Banda_Criminal (Nombre, Area_Influencia, Descripcion) 
+VALUES ('N/A', 'N/A', 'N/A');
+
 
 INSERT INTO Tipo_Documento (Tipo, Descripcion) VALUES ('Reporte', 'Documento de tipo reporte policial');
 INSERT INTO Tipo_Documento (Tipo, Descripcion) VALUES ('Orden', 'Documento de tipo orden de captura');
@@ -590,8 +591,6 @@ INSERT INTO Evidencia (ID_Evidencia, ID_Caso, Tipo_Evidencia, Descripcion, Fecha
 VALUES (7, 7, 'Llamadas', 'Registro de llamadas', TO_DATE('2023-10-07', 'YYYY-MM-DD'), 'Archivo Central');
 COMMIT;
 
-
-
 --10 Consultas:
 --1 Obtener todos los detenidos con su fecha de nacimiento:
 SELECT * FROM DETENIDO;
@@ -602,7 +601,7 @@ SELECT Nombre, Apellido, Especialidad FROM Abogados;
 --4 Obtener las evidencias de un caso específico:
 SELECT ID_Evidencia, Tipo_Evidencia, Descripcion FROM Evidencia WHERE ID_Caso = 2;
 --5 Contar el número de casos abiertos:
-SELECT COUNT(*) FROM Casos WHERE Estado = 'En investigación';
+SELECT COUNT(*) FROM Casos WHERE Estado = 'Abierto';
 --6 Listar todos los jueces con su especialidad:
 SELECT Nombre, Apellido, Especialidad FROM Jueces;
 --7 Obtener el número total de traslados realizados
@@ -706,8 +705,27 @@ CREATE OR REPLACE PROCEDURE insertar_Detenido(
 ) IS 
 BEGIN
     INSERT INTO Detenido (Documento_Identidad, Nombres, Apellidos, Alias, Genero, Fecha_Nacimiento, Nacionalidad, Banda_Nombre, Talla, Contextura, CIP, Direccion) 
-    VALUES (d_dni, d_nombres,  d_apellidos, d_alias, d_genero, TRUNC(TO_DATE( d_fecha_nacimiento , 'YYYY-MM-DD')),  d_nacionalidad ,  d_banda_nombre, d_talla, d_contextura, d_cip,  d_direccion);
+    VALUES (d_dni, d_nombres,  d_apellidos, d_alias, d_genero, d_fecha_nacimiento,  d_nacionalidad ,  d_banda_nombre, d_talla, d_contextura, d_cip,  d_direccion);
 END;
+
+BEGIN
+    insertar_Detenido(
+        '32345658',  -- Documento_Identidad
+        'Diego',  -- Nombres
+        'Macedo',  -- Apellidos
+        'Regy',  -- Alias
+        'M',  -- Género
+        TO_DATE('1990-05-12', 'YYYY-MM-DD'),  -- Fecha_Nacimiento
+        'Peruano',  -- Nacionalidad
+        'Los god',  -- Banda_Nombre
+        1.75,  -- Talla
+        'Atlética',  -- Contextura
+        '11112222',  -- CIP
+        'Av. Siempre Viva 742'  -- Dirección
+    );
+END;
+/
+Commit;
 
 --2 Procedimiento para actualizar el estado de una caso
  CREATE OR REPLACE PROCEDURE actualizar_estado_caso(
@@ -720,6 +738,10 @@ BEGIN
     WHERE ID_Caso = p_id_caso;
 END;
 
+BEGIN
+    actualizar_estado_caso(1, 'Cerrado');
+END;
+/
 
 --Funcion 1
 
@@ -834,7 +856,6 @@ VALUES (TO_DATE('2027-01-01', 'YYYY-MM-DD'));
 
 
 -- 3 Trigger de Insert y update--
-
 CREATE OR REPLACE TRIGGER TRIGGER_fechas_traslado
 BEFORE INSERT OR UPDATE ON traslado
 FOR EACH ROW
@@ -877,9 +898,9 @@ BEGIN
   END;
 END;
 /
+
 -- Intentamos eliminar el antecedente
 DELETE FROM antecedentes_penales WHERE ID_Antecedente = 4;
-
 
 --6 Trigger de update--
 CREATE OR REPLACE TRIGGER TRIGGER_antecedentes_update
@@ -901,3 +922,4 @@ END;
 UPDATE antecedentes_penales 
 SET documento_identidad = '12345681' 
 WHERE ID_Antecedente = 5;
+
